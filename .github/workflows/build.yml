@@ -27,12 +27,12 @@ jobs:
     - name: Update base image
       if: matrix.arch == 'i386'
       run: |
-        docker pull i386/php:7.3-${{ matrix.variant }}
+        docker pull i386/php:7.4-${{ matrix.variant }}
 
     - name: Update base image
       if: matrix.arch != 'i386'
       run: |
-        docker pull php:7.3-${{ matrix.variant }}
+        docker pull php:7.4-${{ matrix.variant }}
 
     - name: Build image ${{ matrix.variant }} ${{ matrix.arch }}
       run: |
@@ -63,12 +63,3 @@ jobs:
         hash_before=$(git write-tree)
         ./update.sh
         bash -c "[[ $hash_before = $(git add -A && git write-tree) ]]"
-
-    - name: Install bashbrew
-      run: |
-        curl -fsSL -o bashbrew https://doi-janky.infosiftr.net/job/bashbrew/job/master/lastSuccessfulBuild/artifact/bashbrew-amd64
-        chmod +x "bashbrew"
-        echo "::add-path::$(pwd)"
-    - name: Run stackbrew
-      run: |
-        ./generate-stackbrew-library.sh
