@@ -1,0 +1,74 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest]
+        variant: [apache, fpm, fpm-alpine]
+        arch: [amd64, i386]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
+      with:
+        repository: 'docker-library/official-images'
+        path: 'official-images'
+
+    - name: Fix image
+      if: matrix.arch == 'i386'
+      run: |
+        sed -i -e 's/FROM php/FROM i386\/php/g' "${{ matrix.variant }}/Dockerfile"
+
+    - name: Update base image
+      if: matrix.arch == 'i386'
+      run: |
+        docker pull i386/php:7.3-${{ matrix.variant }}
+
+    - name: Update base image
+      if: matrix.arch != 'i386'
+      run: |
+        docker pull php:7.3-${{ matrix.variant }}
+
+    - name: Build image ${{ matrix.variant }} ${{ matrix.arch }}
+      run: |
+        docker build ${{ matrix.variant }} -t officelife:${{ matrix.variant }}
+        docker images
+
+    - name: Test image ${{ matrix.variant }} ${{ matrix.arch }}
+      if: matrix.arch != 'i386' || matrix.variant != 'apache'
+      run: |
+        official-images/test/run.sh officelife:${{ matrix.variant }}
+
+    - name: Publish package
+      if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
+      run: |
+        echo "$password" | docker login ghcr.io -u $username --password-stdin
+        docker tag officelife:${{ matrix.variant }} ghcr.io/officelifehq/officelife-dev:${{ matrix.variant }}
+        docker push ghcr.io/officelifehq/officelife-dev:${{ matrix.variant }}
+      env:
+        username: ${{ secrets.CR_USER }}
+        password: ${{ secrets.CR_PAT }}
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Test update script
+      run: |
+        hash_before=$(git write-tree)
+        ./update.sh
+        bash -c "[[ $hash_before = $(git add -A && git write-tree) ]]"
+
+    - name: Install bashbrew
+      run: |
+        curl -fsSL -o bashbrew https://doi-janky.infosiftr.net/job/bashbrew/job/master/lastSuccessfulBuild/artifact/bashbrew-amd64
+        chmod +x "bashbrew"
+        echo "::add-path::$(pwd)"
+    - name: Run stackbrew
+      run: |
+        ./generate-stackbrew-library.sh

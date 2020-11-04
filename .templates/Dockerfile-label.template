@@ -1,0 +1,6 @@
+LABEL org.opencontainers.image.authors="Alexis Saettler <alexis@saettler.org>" \
+      org.opencontainers.image.title="OfficeLife." \
+      org.opencontainers.image.description="Know how your employees feel." \
+      org.opencontainers.image.url="https://officelife.io" \
+      org.opencontainers.image.source="https://github.com/officelifehq/docker" \
+      org.opencontainers.image.vendor="OfficeLife"
