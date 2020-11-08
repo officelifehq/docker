@@ -10,6 +10,10 @@ globalTests+=(
 imageTests+=(
 	[officelife]='
 		officelife-cli
+		officelife-mysql5.7
+		officelife-mysql8
+		officelife-sqlite
+		officelife-pgsql
 	'
 	[officelife:apache]='
 		officelife-apache-run

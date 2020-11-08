@@ -49,6 +49,9 @@ if expr "$1" : "apache" 1>/dev/null || [ "$1" = "php-fpm" ]; then
 
     if [ "$DB_CONNECTION" != "sqlite" ]; then
       waitfordb
+    elif [ -n "$DB_DATABASE" ]; then
+      touch "$DB_DATABASE"
+      chown www-data:www-data "$DB_DATABASE"
     fi
     ${ARTISAN} setup --force -vv
 

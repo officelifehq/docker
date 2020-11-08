@@ -73,6 +73,7 @@ RUN set -ex; \
     apt-get install -y --no-install-recommends $fetchDeps; \
     \
 %%INSTALL%% \
+%%POSTINSTALL%% \
     \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps; \
     rm -rf /var/lib/apt/lists/*
