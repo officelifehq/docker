@@ -45,15 +45,13 @@ jobs:
     - name: Get version
       id: version
       if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
-      run: |
-        version=$(cat 0/version)
-        echo "::set-output name=version::$version"
+      run: echo "::set-output name=version::$(cat 0/version)"
 
     - name: Publish package
       if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
       run: |
         echo "$password" | docker login ghcr.io -u $username --password-stdin
-        for version in ${{ matrix.variant }} ${{ steps.version.output.version }}-${{ matrix.variant }}; do
+        for version in ${{ matrix.variant }} ${{ steps.version.outputs.version }}-${{ matrix.variant }}; do
           docker tag officelife:${{ matrix.variant }} ghcr.io/officelifehq/officelife-dev:$version
           docker push ghcr.io/officelifehq/officelife-dev:$version
         done
