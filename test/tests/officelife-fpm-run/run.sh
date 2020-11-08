@@ -54,6 +54,8 @@ fcgi-request() {
 		-e SCRIPT_FILENAME=/var/www/html/public/"${url#/}" \
 		-e QUERY_STRING="$queryString" \
 		-e REQUEST_URI="$requestUri" \
+		-e HTTP_HOST="localhost" \
+		-e SERVER_PORT="80" \
 		"$clientImage" \
 		-bind -connect fpm:9000
 }
@@ -62,7 +64,7 @@ fcgi-request() {
 . "$dir/../../retry.sh" --tries 30 'fcgi-request GET index.php' > /dev/null 2>&1
 
 # Check that we can request /register and that it contains the pattern "Welcome" somewhere
-fcgi-request GET '/index.php' '' |tac|tac| grep -iq 'Welcome'
-fcgi-request GET '/index.php' signup |tac|tac| grep -iq '&quot;url&quot;:&quot;\\/signup&quot;'
+fcgi-request GET '/index.php' '/' |tac|tac| grep -iq 'Welcome'
+fcgi-request GET '/index.php' '/signup' |tac|tac| grep -iq '&quot;url&quot;:&quot;\\/signup&quot;'
 
 # (without "|tac|tac|" we get "broken pipe" since "grep" closes the pipe before "curl" is done reading it)

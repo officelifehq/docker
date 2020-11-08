@@ -39,7 +39,6 @@ jobs:
         docker images
 
     - name: Test image ${{ matrix.variant }} ${{ matrix.arch }}
-      if: matrix.arch != 'i386' || matrix.variant != 'apache'
       run: |
         test/run.sh officelife:${{ matrix.variant }}
 
