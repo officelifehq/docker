@@ -107,6 +107,9 @@ extra=$(_template .templates/Dockerfile-extra.template)
 install=$(_template .templates/Dockerfile-install.template)
 
 for version in $versions; do
+    if [ "$version" != "main" ]; then
+        echo ${release#v} > $version/version
+    fi
     for variant in $variants; do
         echo Generating $version/$variant variant...
         rm -rf $version/$variant
@@ -120,10 +123,9 @@ for version in $versions; do
         officelife_commit=$commit
 
         if [ "$version" == "main" ]; then
-          extra_install="$extra_install%0A\
-COPY officelife-\${OFFICELIFE_VERSION}.tar.bz2 ."
           officelife_version="main"
           officelife_commit=""
+          extra_install="$extra_install%0ACOPY officelife-\${OFFICELIFE_VERSION}.tar.bz2 ."
         fi
 
         template="Dockerfile-$basev.template"

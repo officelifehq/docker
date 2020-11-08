@@ -42,12 +42,21 @@ jobs:
       run: |
         test/run.sh officelife:${{ matrix.variant }}
 
+    - name: Get version
+      id: version
+      if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
+      run: |
+        version=$(cat 0/version)
+        echo "::set-output name=version::$version"
+
     - name: Publish package
       if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
       run: |
         echo "$password" | docker login ghcr.io -u $username --password-stdin
-        docker tag officelife:${{ matrix.variant }} ghcr.io/officelifehq/officelife-dev:${{ matrix.variant }}
-        docker push ghcr.io/officelifehq/officelife-dev:${{ matrix.variant }}
+        for version in ${{ matrix.variant }} ${{ steps.version.output.version }}-${{ matrix.variant }}; do
+          docker tag officelife:${{ matrix.variant }} ghcr.io/officelifehq/officelife-dev:$version
+          docker push ghcr.io/officelifehq/officelife-dev:$version
+        done
       env:
         username: ${{ secrets.CR_USER }}
         password: ${{ secrets.CR_PAT }}
