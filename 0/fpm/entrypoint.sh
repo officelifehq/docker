@@ -47,7 +47,7 @@ if expr "$1" : "apache" 1>/dev/null || [ "$1" = "php-fpm" ]; then
         echo "APP_KEY already set"
     fi
 
-    if [ "$DB_CONNECTION" = "mysql" ]; then
+    if [ "$DB_CONNECTION" != "sqlite" ]; then
       waitfordb
     fi
     ${ARTISAN} setup --force -vv

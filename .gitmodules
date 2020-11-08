@@ -1,0 +1,3 @@
+[submodule "official-images"]
+	path = official-images
+	url = git@github.com:docker-library/official-images.git
