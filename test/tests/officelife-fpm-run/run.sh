@@ -16,8 +16,6 @@ ENTRYPOINT ["cgi-fcgi"]
 EOF
 
 cid="$(docker run -d \
-	-e DB_CONNECTION=sqlite \
-	-e DB_DATABASE=/var/www/html/database/database.sqlite \
 	"$image")"
 trap "docker rm -vf $cid > /dev/null" EXIT
 

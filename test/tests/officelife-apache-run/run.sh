@@ -6,8 +6,6 @@ dir="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 image="$1"
 
 cid="$(docker run -d \
-	-e DB_CONNECTION=sqlite \
-	-e DB_DATABASE=database/database.sqlite \
 	"$image")"
 trap "docker rm -vf $cid > /dev/null" EXIT
 
