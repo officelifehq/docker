@@ -60,6 +60,7 @@ RUN set -ex; \
     ; \
     \
 %%INSTALL%% \
+%%POSTINSTALL%% \
     \
     apk del .fetch-deps
 

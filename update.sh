@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -Eeo pipefail
-set -x
 
 release=$1
 
@@ -105,6 +104,7 @@ head=$(_template .templates/Dockerfile-head.template)
 foot=$(_template .templates/Dockerfile-foot.template)
 extra=$(_template .templates/Dockerfile-extra.template)
 install=$(_template .templates/Dockerfile-install.template)
+postinstall=$(_template .templates/Dockerfile-postinstall.template)
 
 for version in $versions; do
     if [ "$version" != "main" ]; then
@@ -136,10 +136,8 @@ for version in $versions; do
             s@%%FOOT%%@'"$foot"'@;
             s@%%EXTRA_INSTALL%%@'"$extra_install"'@;
             s@%%INSTALL%%@'"$inst"'@;
-            s@%%PREINSTALL%%@'"$pre_install"'@;
-            s@%%POSTINSTALL%%@'"$post_install"'@;
+            s@%%POSTINSTALL%%@'"$postinstall"'@;
             s@%%FETCHDEPS%%@'"$fetchDep"'@;
-            s@%%PRE%%@'"$pre"'@;
             s/%%VARIANT%%/'"$variant"'/;
             s/%%PHP_VERSION%%/'"$phpVersion"'/;
             s#%%LABEL%%#'"$label"'#;

@@ -6,6 +6,8 @@ dir="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 image="$1"
 
 cid="$(docker run -d \
+	-e DB_CONNECTION=sqlite \
+	-e DB_DATABASE=/var/www/html/database/database.sqlite \
 	"$image")"
 trap "docker rm -vf $cid > /dev/null" EXIT
 
@@ -17,4 +19,4 @@ _artisan() {
 . "$dir/../../retry.sh" --tries 30 "_artisan migrate:status"
 
 # Check if installation is complete
-_artisan schedule:run | grep -iq 'No scheduled commands are ready to run.'
+_artisan migrate:status > /dev/null 2>&1

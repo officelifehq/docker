@@ -137,7 +137,14 @@ RUN set -ex; \
     \
     rm -r officelife-${OFFICELIFE_VERSION}.tar.bz2; \
     \
-    cp /var/www/html/.env.example /var/www/html/.env; \
+    sed -e ' \
+        s/APP_DEBUG=.*/APP_DEBUG=false/; \
+        s/LOG_CHANNEL=.*/LOG_CHANNEL=errorlog/; \
+        s/DB_CONNECTION=.*/DB_CONNECTION=sqlite/; \
+        s%DB_DATABASE=.*%DB_DATABASE=/var/www/html/database/database.sqlite%; \
+        ' \
+        /var/www/html/.env.example > /var/www/html/.env; \
+    \
     chown -R www-data:www-data /var/www/html; \
     \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $fetchDeps; \

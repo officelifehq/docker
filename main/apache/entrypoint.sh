@@ -41,13 +41,18 @@ if expr "$1" : "apache" 1>/dev/null || [ "$1" = "php-fpm" ]; then
     chown -R www-data:www-data ${STORAGE}
     chmod -R g+rw ${STORAGE}
 
+    if [ "${DB_CONNECTION:-sqlite}" == "sqlite" ]; then
+      touch "${DB_DATABASE:-database/database.sqlite}"
+      chown www-data:www-data "${DB_DATABASE:-database/database.sqlite}"
+    fi
+
     if [ -z "${APP_KEY:-}" ]; then
         ${ARTISAN} key:generate --no-interaction
     else
         echo "APP_KEY already set"
     fi
 
-    if [ "$DB_CONNECTION" != "sqlite" ]; then
+    if [ "${DB_CONNECTION:-sqlite}" != "sqlite" ]; then
       waitfordb
     fi
     ${ARTISAN} setup --force -vv
