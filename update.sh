@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -Eeo pipefail
-set -x
 
 release=$1
 
