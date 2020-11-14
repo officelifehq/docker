@@ -33,7 +33,8 @@ jobs:
         with:
           context: ${{ env.MAJOR_VERSION }}/${{ matrix.variant }}
           file: ${{ env.MAJOR_VERSION }}/${{ matrix.variant }}/Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' && matrix.arch != '386' }}
+          push: false
+          load: true
           platforms: linux/${{ matrix.arch }}
           tags: officelife:${{ matrix.variant }}
 
