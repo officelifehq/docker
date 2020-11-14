@@ -2,6 +2,9 @@ name: Build
 
 on: [push]
 
+env:
+  MAJOR_VERSION: 0
+
 jobs:
   build:
     runs-on: ${{ matrix.operating-system }}
@@ -10,11 +13,7 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
         variant: [apache, fpm, fpm-alpine]
-        arch: [amd64, 386]
-    
-    env:
-      MAJOR_VERSION: 0
-      
+        arch: [amd64, 386]      
 
     steps:
       - uses: actions/checkout@v2
@@ -32,8 +31,8 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: $MAJOR_VERSION/${{ matrix.variant }}
-          file: $MAJOR_VERSION/${{ matrix.variant }}/Dockerfile
+          context: ${{ env.MAJOR_VERSION }}/${{ matrix.variant }}
+          file: ${{ env.MAJOR_VERSION }}/${{ matrix.variant }}/Dockerfile
           push: ${{ github.ref == 'refs/heads/main' && matrix.arch != '386' }}
           platforms: linux/${{ matrix.arch }}
           tags: officelife:${{ matrix.variant }}
