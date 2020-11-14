@@ -10,54 +10,60 @@ jobs:
       matrix:
         operating-system: [ubuntu-latest]
         variant: [apache, fpm, fpm-alpine]
-        arch: [amd64, i386]
+        arch: [amd64, 386]
+    
+    env:
+      MAJOR_VERSION: 0
+      
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: '1'
-        submodules: true
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '1'
+          submodules: true
 
-    - name: Fix image
-      if: matrix.arch == 'i386'
-      run: |
-        sed -i -e 's/FROM php/FROM i386\/php/g' "0/${{ matrix.variant }}/Dockerfile"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
-    - name: Update base image
-      if: matrix.arch == 'i386'
-      run: |
-        docker pull i386/php:7.4-${{ matrix.variant }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-    - name: Update base image
-      if: matrix.arch != 'i386'
-      run: |
-        docker pull php:7.4-${{ matrix.variant }}
+      - name: Docker build
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: $MAJOR_VERSION/${{ matrix.variant }}
+          file: $MAJOR_VERSION/${{ matrix.variant }}/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' && matrix.arch != '386' }}
+          platforms: linux/${{ matrix.arch }}
+          tags: officelife:${{ matrix.variant }}
 
-    - name: Build image ${{ matrix.variant }} ${{ matrix.arch }}
-      run: |
-        docker build 0/${{ matrix.variant }} -t officelife:${{ matrix.variant }}
-        docker images
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
 
-    - name: Test image ${{ matrix.variant }} ${{ matrix.arch }}
-      run: |
-        test/run.sh officelife:${{ matrix.variant }}
+      - name: Test image
+        run: test/run.sh officelife:${{ matrix.variant }}
 
-    - name: Get version
-      id: version
-      if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
-      run: echo "::set-output name=version::$(cat 0/version)"
+      - name: Login to GitHub container registry
+        uses: docker/login-action@v1
+        if: github.ref == 'refs/heads/main' && matrix.arch != '386'
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.CR_USER }}
+          password: ${{ secrets.CR_PAT }}
 
-    - name: Publish package
-      if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
-      run: |
-        echo "$password" | docker login ghcr.io -u $username --password-stdin
-        for version in ${{ matrix.variant }} ${{ steps.version.outputs.version }}-${{ matrix.variant }}; do
-          docker tag officelife:${{ matrix.variant }} ghcr.io/officelifehq/officelife-dev:$version
-          docker push ghcr.io/officelifehq/officelife-dev:$version
-        done
-      env:
-        username: ${{ secrets.CR_USER }}
-        password: ${{ secrets.CR_PAT }}
+      - name: Get version
+        id: version
+        if: github.ref == 'refs/heads/main' && matrix.arch != 'i386'
+        run: echo "::set-output name=version::$(cat $MAJOR_VERSION/version)"
+
+      - name: Docker push
+        if: github.ref == 'refs/heads/main' && matrix.arch != '386'
+        run: |
+          for version in ${{ matrix.variant }} ${{ steps.version.outputs.version }}-${{ matrix.variant }}; do
+            docker tag officelife:${{ matrix.variant }} ghcr.io/officelifehq/officelife-dev:$version
+            docker push ghcr.io/officelifehq/officelife-dev:$version
+          done
 
 #  test:
 #    runs-on: ubuntu-latest
