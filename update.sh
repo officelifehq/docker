@@ -14,7 +14,7 @@ variants="apache fpm fpm-alpine"
 versions="$minVersion main"
 
 declare -A php_version=(
-    [default]='7.4'
+    [default]='8.0'
 )
 
 declare -A install=(
@@ -94,7 +94,7 @@ _githubapi() {
 }
 
 if [ -z "$release" ]; then
-  release="$(_githubapi 'https://api.github.com/repos/officelifehq/officelife/releases/latest' | jq -r '.tag_name')"
+  release="$(_githubapi 'https://api.github.com/repos/officelifehq/officelife/releases/latest' | jq -r '.tag_name' || _githubapi 'https://api.github.com/repos/officelifehq/officelife/releases' | jq -r '.[0].tag_name')"
 fi
 echo "  OfficeLife version: $release"
 commit="$(_githubapi 'https://api.github.com/repos/officelifehq/officelife/tags' | jq -r 'map(select(.name | contains ("'$release'"))) | .[].commit.sha')"

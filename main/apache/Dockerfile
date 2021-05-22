@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.0-apache
 
 # opencontainers annotations https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.authors="Alexis Saettler <alexis@saettler.org>" \
@@ -47,9 +47,9 @@ RUN set -ex; \
     ; \
     \
 # pecl will claim success even if one install fails, so we need to perform each install separately
-    pecl install APCu-5.1.19; \
+    pecl install APCu-5.1.20; \
     pecl install memcached-3.1.5; \
-    pecl install redis-5.3.2; \
+    pecl install redis-5.3.4; \
     \
     docker-php-ext-enable \
         apcu \
