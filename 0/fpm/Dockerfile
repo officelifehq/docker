@@ -107,9 +107,9 @@ RUN set -ex; \
 WORKDIR /var/www/html
 
 # Define OfficeLife version
-ENV OFFICELIFE_VERSION v0.1.0-alpha.9
-LABEL org.opencontainers.image.revision="c060b008b122662eee8df1b0b1a6289be52fc0e8" \
-      org.opencontainers.image.version="v0.1.0-alpha.9"
+ENV OFFICELIFE_VERSION v0.1.0-alpha.10
+LABEL org.opencontainers.image.revision="45509ec7421096f188f89f05cc5bd76280701b6c" \
+      org.opencontainers.image.version="v0.1.0-alpha.10"
 
 RUN set -ex; \
     fetchDeps=" \
