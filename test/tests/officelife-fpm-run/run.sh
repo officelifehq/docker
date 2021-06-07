@@ -47,8 +47,9 @@ fcgi-request() {
 # Make sure that PHP-FPM is listening and ready
 . "$dir/../../retry.sh" --tries 30 'fcgi-request GET index.php' > /dev/null 2>&1
 
-# Check that we can request /register and that it contains the pattern "Welcome" somewhere
-fcgi-request GET '/index.php' '/' |tac|tac| grep -iq 'Welcome'
-fcgi-request GET '/index.php' '/signup' |tac|tac| grep -iq '&quot;url&quot;:&quot;\\/signup&quot;'
+# Check that we can request /login and that it contains the pattern "Welcome" somewhere
+fcgi-request GET '/index.php' '/' |tac|tac| grep -iq 'Redirecting to http://localhost/login'
+fcgi-request GET '/index.php' '/login' |tac|tac| grep -iq 'Welcome'
+fcgi-request GET '/index.php' '/register' |tac|tac| grep -iq '&quot;url&quot;:&quot;\\/register&quot;'
 
 # (without "|tac|tac|" we get "broken pipe" since "grep" closes the pipe before "curl" is done reading it)

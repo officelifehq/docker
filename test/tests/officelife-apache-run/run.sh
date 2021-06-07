@@ -25,6 +25,6 @@ _request() {
 
 # Check that we can request / and that it contains the pattern "Welcome" somewhere
 _request GET '/' |tac|tac| grep -iq "Welcome"
-_request GET '/signup' |tac|tac| grep -iq '&quot;url&quot;:&quot;\\/signup&quot;'
+_request GET '/register' |tac|tac| grep -iq '&quot;url&quot;:&quot;\\/register&quot;'
 
 # (without "|tac|tac|" we get "broken pipe" since "grep" closes the pipe before "curl" is done reading it)
