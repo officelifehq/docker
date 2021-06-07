@@ -5,7 +5,7 @@ set -Eeo pipefail
 build() {
 	for variant in $variants; do
 		pushd 0/$variant
-		docker pull php:7.4-$variant
+		docker pull php:8.0-$variant
 		docker build --no-cache -t officelife:$variant .
 		popd
 	done
@@ -20,7 +20,7 @@ build_main() {
 		  popd
 		fi
 		cp -f ../../../officelife/officelife-main.tar.bz2 .
-		docker pull php:7.4-$variant
+		docker pull php:8.0-$variant
 		docker build --no-cache -t officelife:$variant-main .
 		popd
 	done
