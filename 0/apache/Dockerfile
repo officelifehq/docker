@@ -138,9 +138,7 @@ RUN set -ex; \
     \
     GPGKEY='213F85B7B1B8F93224FA85B138C2BAD715449E85'; \
     export GNUPGHOME="$(mktemp -d)"; \
-    for server in $(shuf -e ha.pool.sks-keyservers.net \
-                            hkp://p80.pool.sks-keyservers.net:80 \
-                            keyserver.ubuntu.com \
+    for server in $(shuf -e keyserver.ubuntu.com \
                             hkp://keyserver.ubuntu.com:80 \
                             pgp.mit.edu) ; do \
         if gpg --batch --keyserver "${server}" --recv-keys "$GPGKEY"; then \
@@ -152,7 +150,7 @@ RUN set -ex; \
     tar -xf officelife-${OFFICELIFE_VERSION}.tar.bz2 -C /var/www/html --strip-components=1; \
     \
     gpgconf --kill all; \
-    rm -r "$GNUPGHOME" officelife-${OFFICELIFE_VERSION}.tar.bz2 officelife-${OFFICELIFE_VERSION}.tar.bz2.asc; \
+    rm -rf "$GNUPGHOME" officelife-${OFFICELIFE_VERSION}.tar.bz2 officelife-${OFFICELIFE_VERSION}.tar.bz2.asc; \
     \
     sed -e ' \
         s/APP_DEBUG=.*/APP_DEBUG=false/; \
