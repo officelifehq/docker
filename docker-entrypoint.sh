@@ -63,41 +63,51 @@ $mysql->close();
 EOPHP
 }
 
-HTMLDIR=/var/www/html
-
-# change uid/gid of www-data
-if [ "$(id -u)" = 0 ]; then
-    CURRENT_UID=$(id -u www-data)
-    CURRENT_GID=$(id -g www-data)
-    if [ -n "${UID+x}" ] && [ "$UID" -ne $CURRENT_UID ]; then
-        echo "Change UID of www-data from $CURRENT_UID to $UID"
-        usermod -u $UID www-data
-        find $HTMLDIR -xdev -user $CURRENT_UID -exec chown -h www-data {} \;
-    fi
-    if [ -n "${GID+x}" ] && [ "$GID" -ne $CURRENT_GID ]; then
-        echo "Change GID of www-data from $CURRENT_GID to $GID"
-        groupmod -g $GID www-data
-        find $HTMLDIR -xdev -group $CURRENT_GID -exec chgrp -h www-data {} \;
-    fi
-fi
-
 if expr "$1" : "apache" 1>/dev/null || [ "$1" = "php-fpm" ]; then
 
+    uid="$(id -u)"
+    gid="$(id -g)"
+    if [ "$uid" = '0' ]; then
+        case "$1" in
+            php-fpm*)
+                user='www-data'
+                group='www-data'
+                ;;
+            *) # apache
+                user="${APACHE_RUN_USER:-www-data}"
+                group="${APACHE_RUN_GROUP:-www-data}"
+
+                # strip off any '#' symbol ('#1000' is valid syntax for Apache)
+                pound='#'
+                user="${user#$pound}"
+                group="${group#$pound}"
+                ;;
+        esac
+    else
+        user="$uid"
+        group="$gid"
+    fi
+
+    HTMLDIR=/var/www/html
     ARTISAN="php ${HTMLDIR}/artisan"
 
     # Ensure storage directories are present
-    STORAGE=${HTMLDIR}/storage
-    mkdir -p ${STORAGE}/logs
-    mkdir -p ${STORAGE}/app/public
-    mkdir -p ${STORAGE}/framework/views
-    mkdir -p ${STORAGE}/framework/cache
-    mkdir -p ${STORAGE}/framework/sessions
-    chown -R www-data:www-data ${STORAGE}
-    chmod -R g+rw ${STORAGE}
+    if [ "$uid" = '0' ]; then
+        STORAGE=${HTMLDIR}/storage
+        mkdir -p ${STORAGE}/logs
+        mkdir -p ${STORAGE}/app/public
+        mkdir -p ${STORAGE}/framework/views
+        mkdir -p ${STORAGE}/framework/cache
+        mkdir -p ${STORAGE}/framework/sessions
+        chown -R $user:$group ${STORAGE}
+        chmod -R g+rw ${STORAGE}
 
-    if [ "${DB_CONNECTION:-sqlite}" == "sqlite" ]; then
-      touch "${DB_DATABASE:-database/database.sqlite}"
-      chown www-data:www-data "${DB_DATABASE:-database/database.sqlite}"
+        if [ "${DB_CONNECTION:-sqlite}" == "sqlite" ]; then
+            file="${DB_DATABASE:-database/database.sqlite}"
+            test -f "$file" || touch "$file"
+            chown $user:$group "$file"
+        fi
+
     fi
 
     if [ -z "${APP_KEY:-}" ]; then
@@ -109,6 +119,7 @@ if expr "$1" : "apache" 1>/dev/null || [ "$1" = "php-fpm" ]; then
     if [ "${DB_CONNECTION:-sqlite}" != "sqlite" ]; then
       waitfordb
     fi
+
     ${ARTISAN} setup --force -vv
 
 fi
